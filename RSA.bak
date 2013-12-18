@@ -1,0 +1,57 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname RSA) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f ())))
+(require racket/match)
+
+;generating primes
+(define (makelst i n)
+  (cond
+    [(= i n) empty]
+    [else (cons i (makelst (+ i 1) n))]))
+
+(define (listprimes n)
+  (editlist (makelst 2 n) n))
+
+(define (editlist lst n)
+  (cond
+    [(> (* (first lst) (first lst)) n) lst]
+    [else (cons (first lst) (editlist (removelist (first lst) (rest lst)) n))]))
+  
+(define (removelist i lst)
+  (cond
+    [(empty? lst) empty]
+    [(= (remainder (first lst) i) 0) (removelist i (rest lst)) ]
+    [else (cons (first lst) (removelist i (rest lst)))]))
+
+;generating unique primes p and q
+(define (unique new n)
+  (cond
+    [(equal? new n) (unique (list-ref plist (random (length plist))) n)]
+    [else new]))
+(define plist (listprimes 100000))
+(define p (list-ref plist (random (length plist))))
+(define q (unique (list-ref plist (random (length plist))) p))
+
+;more variables
+(define n (* p q))
+(define thetan (*(- p 1)(- q 1)))
+(define (gcd1 thetan e)
+  (cond
+    [(= 1 (gcd thetan e)) e]
+    [else (gcd1 thetan (random thetan))]))
+(define E (gcd1 thetan (random thetan)))
+
+;eea
+(define (eea lst)
+  (match lst
+    ['((x y r q) (X Y R Q)) ;two rows previous
+     (cond
+       [(= 0 R) '(x y r q)] ;the answer row
+       [else 
+        (let* ([quot (quotient r R)] ;new q
+               [newx (- x (* quot X))] 
+               [newy (- y (* quot Y))]
+               [newr (- r (* quot R))])
+          (eea '((X Y R Q)(newx newy newr quot))))])]
+    ;[x x] ;when it just returns 
+    ))
